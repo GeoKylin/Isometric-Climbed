@@ -1,0 +1,198 @@
+
+// yuan_3View.cpp : Cyuan_3View 类的实现
+//
+
+#include "stdafx.h"
+// SHARED_HANDLERS 可以在实现预览、缩略图和搜索筛选器句柄的
+// ATL 项目中进行定义，并允许与该项目共享文档代码。
+#ifndef SHARED_HANDLERS
+#include "yuan_3.h"
+#endif
+
+#include "yuan_3Doc.h"
+#include "yuan_3View.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+
+// Cyuan_3View
+
+IMPLEMENT_DYNCREATE(Cyuan_3View, CView)
+
+BEGIN_MESSAGE_MAP(Cyuan_3View, CView)
+	// 标准打印命令
+	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
+	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
+	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
+END_MESSAGE_MAP()
+
+// Cyuan_3View 构造/析构
+
+Cyuan_3View::Cyuan_3View()
+{
+	// TODO:  在此处添加构造代码
+
+}
+
+Cyuan_3View::~Cyuan_3View()
+{
+}
+
+BOOL Cyuan_3View::PreCreateWindow(CREATESTRUCT& cs)
+{
+	// TODO:  在此处通过修改
+	//  CREATESTRUCT cs 来修改窗口类或样式
+
+	return CView::PreCreateWindow(cs);
+}
+
+// Cyuan_3View 绘制
+
+void Cyuan_3View::OnDraw(CDC* pDC)
+{
+	Cyuan_3Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+		return;
+
+	// TODO:  在此处为本机数据添加绘制代码
+	//////////////////////////  定义参数  //////////////////////////
+	int center_x = 450, center_y = 330, radious = 300;
+	int o_x = radious, o_y = radious;
+	int stand_x = center_x - o_x, stand_y = center_y - o_y+300;
+	double step = 1;
+	int hight = 0;
+	int r = 50;
+	double a = 37;
+	double aa = 1;
+	double f = (1 + sqrt(5.0)) / 2;
+	//////////////////////////  定义画笔  //////////////////////////
+	CPen redp(PS_SOLID, 1, RGB(255, 0, 0));
+	CPen bluep(PS_SOLID, 1, RGB(0, 0, 255));
+	pDC->MoveTo(center_x, center_y);
+	pDC->LineTo(center_x + 1, center_y + 1);
+	CGdiObject *pOld = pDC->SelectObject(&redp);
+	//////////////////////////  测试部分  //////////////////////////////
+	//pDC->Ellipse(center_x - 1, center_y - 1, center_x + 1, center_y + 1);
+	/******************************************
+	for (int i = radious; i >= 0; i-=7*step)
+	{
+		for (int x = 0; x < 2 * radious + 1; x++)
+		{
+			for (int y = 0; y < 2 * radious + 1; y++)
+			{
+				if (int(sqrt((x - o_x)*(x - o_x) + (y - o_y)*(y - o_y) + 0.0) + 0.5) == i)
+				{
+					if (i % 2 == 0) pDC->SelectObject(&redp);
+					else pDC->SelectObject(&bluep);
+					pDC->MoveTo(center_x - o_x + x , center_y - o_y + y );
+					pDC->LineTo(center_x - o_x + x + 1, center_y - o_y + y + 1);
+
+					//matrix[x][y] = hight;
+				}
+			}
+		}
+		//hight++;
+	}
+	/***********************************************
+	//////////////////////////  输入高程  //////////////////////////////
+	for (int i = radious; i >= 0; i -= step)
+	{
+		for (int x = 0; x < 2 * radious + 1; x++)
+		{
+			for (int y = 0; y < 2 * radious + 1; y++)
+			{
+				if (int(sqrt((x - o_x)*(x - o_x) + (y - o_y)*(y - o_y) + 0.0) + 0.5) == i)
+				{					
+					matrix[x][y] = hight;
+				}
+			}
+		}
+		hight++;
+	}
+	/************************************************/
+	//////////////////////////  迭代  //////////////////////////////
+	for (int i = radious; i >= 0; i -= step)
+	{
+		//////////////////////  绘图  //////////////////////////////
+		CPen changep(PS_SOLID, 1, RGB(255 - i / 9 * 7, 0 + i / 9 * 7, 0 + i / 9 * 7));
+		CBrush changeb(RGB(235 - i / 9 * 7, 0 + i / 9 * 7, 0 + i / 9 * 7));
+		pDC->SelectObject(&changep);
+		pDC->SelectObject(&changeb);
+		//////////////////////  画圈  //////////////////////////////
+		/********************
+		stand_x = int(i*cos(log((i + 0.0) / aa)*tan(a*3.1415927 / 180)) + 0.5) + center_x;
+		stand_y = int(i*sin(log((i + 0.0) / aa)*tan(a*3.1415927 / 180)) + 0.5) + center_y;
+		/**********************/
+		stand_x = int(i*cos((log(i*f / aa)) / (log(pow(f, 5 * 3.1415927 / 3)))) + 0.5) + center_x;
+		stand_y = int(i*sin((log(i*f / aa)) / (log(pow(f, 5 * 3.1415927 / 3)))) + 0.5) + center_y;
+		/**********************/
+		pDC->Ellipse(stand_x - r, stand_y - r, stand_x + r, stand_y + r);
+	}
+	Sleep(2000);
+	/************************************************
+	for (a = 0; a < 100; a++)
+	{
+		for (int i = radious; i >= 0; i -= step)
+		{
+			//////////////////////  绘图  //////////////////////////////
+			CPen changep(PS_SOLID, 1, RGB(255 - i / 9 * 7, 0 + i / 9 * 7, 0));
+			CBrush changeb(RGB(255 - i / 9 * 7, 0 + i / 9 * 7, 0));
+			pDC->SelectObject(&changep);
+			pDC->SelectObject(&changeb);
+			//////////////////////  画圈  //////////////////////////////
+			stand_x = int(i*cos((i + 0.0) / a)) + center_x;
+			stand_y = int(i*sin((i + 0.0) / a)) + center_y;
+			pDC->Ellipse(stand_x - r, stand_y - r, stand_x + r, stand_y + r);
+		}
+		Sleep(2000);
+	}
+	/***********************************************/
+	//////////////////////////  还原  //////////////////////////////
+	pDC->SelectObject(&redp);
+}
+
+
+// Cyuan_3View 打印
+
+BOOL Cyuan_3View::OnPreparePrinting(CPrintInfo* pInfo)
+{
+	// 默认准备
+	return DoPreparePrinting(pInfo);
+}
+
+void Cyuan_3View::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+{
+	// TODO:  添加额外的打印前进行的初始化过程
+}
+
+void Cyuan_3View::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+{
+	// TODO:  添加打印后进行的清理过程
+}
+
+
+// Cyuan_3View 诊断
+
+#ifdef _DEBUG
+void Cyuan_3View::AssertValid() const
+{
+	CView::AssertValid();
+}
+
+void Cyuan_3View::Dump(CDumpContext& dc) const
+{
+	CView::Dump(dc);
+}
+
+Cyuan_3Doc* Cyuan_3View::GetDocument() const // 非调试版本是内联的
+{
+	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(Cyuan_3Doc)));
+	return (Cyuan_3Doc*)m_pDocument;
+}
+#endif //_DEBUG
+
+
+// Cyuan_3View 消息处理程序
